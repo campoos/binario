@@ -1,14 +1,18 @@
 import numpy as np
 import wave
 import struct
+import simpleaudio as sa
 
 # -----------------------
 # 1. Texto para binário
 # -----------------------
-texto = "nick bumbum guloso"
+
+textoDigitado = input("digite sua mensagem: ")
+texto = textoDigitado
 binario = ' '.join(format(ord(c), '08b') for c in texto)
 print("Texto original:", texto)
 print("Em binário:", binario)
+print("Processando áudio...")
 
 # -----------------------
 # 2. Binário para áudio
@@ -45,3 +49,12 @@ with wave.open("mensagem_binario.wav", 'w') as f:
         f.writeframes(struct.pack('<h', int(amostra * 32767)))
 
 print("Áudio gerado: mensagem_binario.wav")
+
+# -----------------------
+# 4. Toca o áudio
+# -----------------------
+# Converte para 16-bit PCM
+audio_pcm = (audio * 32767).astype(np.int16)
+# Reproduz com simpleaudio
+play_obj = sa.play_buffer(audio_pcm, 1, 2, SAMPLE_RATE)
+play_obj.wait_done()  # espera o áudio terminar
