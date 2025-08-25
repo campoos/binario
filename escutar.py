@@ -3,7 +3,9 @@ import wave
 import struct
 import sounddevice as sd
 
-# Parâmetros usados no transmissor
+# -----------------------
+# Parâmetros do transmissor
+# -----------------------
 SAMPLE_RATE = 44100
 DURACAO_BIT = 0.1
 FREQ_0 = 1000
@@ -11,7 +13,15 @@ FREQ_1 = 2000
 
 samples_por_bit = int(SAMPLE_RATE * DURACAO_BIT)
 
+# Marcadores
+MARCADOR_INICIO = "11111111"
+MARCADOR_FIM = "00000000"
+
+# -----------------------
+# Funções
+# -----------------------
 def ler_wav(path):
+    """Lê um arquivo WAV mono e retorna os samples normalizados."""
     with wave.open(path, 'rb') as wf:
         assert wf.getnchannels() == 1
         assert wf.getsampwidth() == 2
@@ -22,10 +32,10 @@ def ler_wav(path):
     return audio
 
 def detectar_freq(chunk):
+    """Detecta se o chunk de áudio corresponde a FREQ_0 ou FREQ_1."""
     fft = np.fft.rfft(chunk)
     freqs = np.fft.rfftfreq(len(chunk), 1/SAMPLE_RATE)
 
-    # pega os bins mais próximos das frequências esperadas
     idx0 = np.argmin(np.abs(freqs - FREQ_0))
     idx1 = np.argmin(np.abs(freqs - FREQ_1))
 
@@ -35,6 +45,7 @@ def detectar_freq(chunk):
     return FREQ_0 if power0 > power1 else FREQ_1
 
 def audio_para_bits(audio):
+    """Converte o áudio em uma sequência de bits."""
     bits = ""
     for i in range(0, len(audio), samples_por_bit):
         chunk = audio[i:i+samples_por_bit]
@@ -44,27 +55,47 @@ def audio_para_bits(audio):
         bits += "0" if freq == FREQ_0 else "1"
     return bits
 
+def extrair_bits_validos(bits):
+    """Extrai apenas os bits entre os marcadores de início e fim."""
+    start = bits.find(MARCADOR_INICIO)
+    end = bits.find(MARCADOR_FIM, start + len(MARCADOR_INICIO))
+    if start != -1 and end != -1:
+        return bits[start + len(MARCADOR_INICIO):end]
+    else:
+        return bits  # se não achar marcadores, retorna tudo
+
 def bits_para_texto(bits):
+    """Converte uma string de bits em texto ASCII."""
     texto = ""
     for i in range(0, len(bits), 8):
         byte = bits[i:i+8]
         if len(byte) < 8:
-            byte = byte.ljust(8, "0")  # completa com zeros
+            byte = byte.ljust(8, "0")
         texto += chr(int(byte, 2))
     return texto
 
-# --------------------------
-# Testando com o WAV gerado
-# --------------------------
-audio = ler_wav("mensagem_binario.wav")
+def tocar_audio(audio):
+    """Toca o áudio recebido."""
+    print("Tocando o áudio recebido...")
+    sd.play(audio, SAMPLE_RATE)
+    sd.wait()
 
-# 🔊 Tocar o áudio antes de traduzir
-print("Tocando o áudio recebido...")
-sd.play(audio, SAMPLE_RATE)
-sd.wait()  # espera terminar a reprodução
+# -----------------------
+# Função principal
+# -----------------------
+def main():
+    audio = ler_wav("mensagem_binario.wav")
+    tocar_audio(audio)
+    bits = audio_para_bits(audio)
+    bits_validos = extrair_bits_validos(bits)
+    texto_decodificado = bits_para_texto(bits_validos)
 
-bits = audio_para_bits(audio)
-texto_decodificado = bits_para_texto(bits)
+    print("Bits recebidos:", bits)
+    print("Bits válidos:", bits_validos)
+    print("Texto decodificado:", texto_decodificado)
 
-print("Bits recebidos:", bits)
-print("Texto decodificado:", texto_decodificado)
+# -----------------------
+# Executa o programa
+# -----------------------
+if __name__ == "__main__":
+    main()

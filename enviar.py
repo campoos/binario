@@ -3,58 +3,50 @@ import wave
 import struct
 import simpleaudio as sa
 
-# -----------------------
-# 1. Texto para binário
-# -----------------------
+# ----------------------------
+# Configurações globais
+# ----------------------------
+SAMPLE_RATE = 44100
+DURACAO_BIT = 0.1
+FREQ_0 = 1000
+FREQ_1 = 2000
+ARQUIVO_SAIDA = "mensagem_binario.wav"
 
-textoDigitado = input("digite sua mensagem: ")
-texto = textoDigitado
-binario = ' '.join(format(ord(c), '08b') for c in texto)
-print("Texto original:", texto)
-print("Em binário:", binario)
-print("Processando áudio...")
+def texto_para_binario(texto: str) -> str:
+    """Converte string em sequência de bits (ASCII, 8 bits por caractere)."""
+    return ''.join(format(ord(c), '08b') for c in texto)
 
-# -----------------------
-# 2. Binário para áudio
-# -----------------------
-SAMPLE_RATE = 44100  # Hz
-DURACAO_BIT = 0.1    # segundos por bit (0.1s => 10 bits/segundo)
-FREQ_0 = 1000        # Hz para o bit 0
-FREQ_1 = 2000        # Hz para o bit 1
+def binario_para_audio(bits: str) -> np.ndarray:
+    """Converte string de bits em onda de áudio normalizada [-1, 1]."""
+    amostras = []
+    for bit in bits:
+        freq = FREQ_1 if bit == '1' else FREQ_0
+        t = np.linspace(0, DURACAO_BIT, int(SAMPLE_RATE * DURACAO_BIT), endpoint=False)
+        onda = np.sin(2 * np.pi * freq * t)
+        amostras.extend(onda)
+    audio = np.array(amostras)
+    return audio / np.max(np.abs(audio))
 
-# Remove os espaços da string binária
-bits_puros = binario.replace(" ", "")
+def salvar_wav(audio: np.ndarray, filename: str = ARQUIVO_SAIDA):
+    """Salva o áudio como arquivo WAV mono 16-bit."""
+    with wave.open(filename, 'w') as f:
+        f.setnchannels(1)
+        f.setsampwidth(2)
+        f.setframerate(SAMPLE_RATE)
+        for amostra in audio:
+            f.writeframes(struct.pack('<h', int(amostra * 32767)))
 
-# Lista para armazenar as amostras
-amostras = []
+def tocar_audio(audio: np.ndarray):
+    """Reproduz áudio gerado diretamente em PCM."""
+    audio_pcm = (audio * 32767).astype(np.int16)
+    play_obj = sa.play_buffer(audio_pcm, 1, 2, SAMPLE_RATE)
+    play_obj.wait_done()
 
-for bit in bits_puros:
-    freq = FREQ_1 if bit == '1' else FREQ_0
-    t = np.linspace(0, DURACAO_BIT, int(SAMPLE_RATE * DURACAO_BIT), endpoint=False)
-    onda = np.sin(2 * np.pi * freq * t)
-    amostras.extend(onda)
-
-# Converte para numpy array e normaliza
-audio = np.array(amostras)
-audio = audio / np.max(np.abs(audio))  # normaliza para [-1, 1]
-
-# -----------------------
-# 3. Salva em WAV
-# -----------------------
-with wave.open("mensagem_binario.wav", 'w') as f:
-    f.setnchannels(1)  # mono
-    f.setsampwidth(2)  # 16 bits
-    f.setframerate(SAMPLE_RATE)
-    for amostra in audio:
-        f.writeframes(struct.pack('<h', int(amostra * 32767)))
-
-print("Áudio gerado: mensagem_binario.wav")
-
-# -----------------------
-# 4. Toca o áudio
-# -----------------------
-# Converte para 16-bit PCM
-audio_pcm = (audio * 32767).astype(np.int16)
-# Reproduz com simpleaudio
-play_obj = sa.play_buffer(audio_pcm, 1, 2, SAMPLE_RATE)
-play_obj.wait_done()  # espera o áudio terminar
+if __name__ == "__main__":
+    texto = input("Digite sua mensagem: ")
+    print("Gerando áudio criptografado...")
+    bits = texto_para_binario(texto)
+    audio = binario_para_audio(bits)
+    salvar_wav(audio)
+    print(f"Mensagem '{texto}' convertida em áudio ({ARQUIVO_SAIDA})")
+    tocar_audio(audio)
