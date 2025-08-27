@@ -29,7 +29,6 @@ def enviar():
         "bits": bits
     }
 
-# Nova rota para servir o arquivo de áudio
 @app.route("/audio/<filename>")
 def get_audio(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
@@ -45,8 +44,8 @@ def receber():
     bits_validos = extrair_bits_validos(bits)
     texto = bits_para_texto(bits_validos)
 
-    return {"texto": texto}
+    # Retorna um JSON com o texto e os bits
+    return {"texto": texto, "bits": bits}
 
-# No seu app.py
 if __name__ == "__main__":
     app.run(debug=True, port=5500)

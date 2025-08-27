@@ -1,256 +1,267 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Criptografia em Áudio</title>
-<style>
-body {
-font-family: Arial, sans-serif;
-background: #f4f6f9;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-margin: 0;
-padding: 20px;
-}
-.container {
-background: #fff;
-padding: 20px 30px;
-border-radius: 12px;
-box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-width: 100%;
-max-width: 500px;
-}
-h2 {
-margin-top: 0;
-color: #333;
-text-align: center;
-}
-form {
-margin-bottom: 20px;
-}
-input[type="text"], input[type="file"] {
-width: 100%;
-padding: 10px;
-margin: 8px 0;
-border: 1px solid #ccc;
-border-radius: 6px;
-}
-button {
-width: 100%;
-padding: 10px;
-background: #007bff;
-color: white;
-border: none;
-border-radius: 6px;
-cursor: pointer;
-font-size: 16px;
-}
-button:hover {
-background: #0056b3;
-}
-audio {
- width: 100%;
-margin-top: 10px;
-}
-#texto-recebido {
- font-weight: bold;
- color: #222;
- text-align: center;
-}
-header {
-width: 100%;
-text-align: center;
-margin-bottom: 20px;
-}
-header a {
-text-decoration: none;
-color: #007bff;
-padding: 10px 20px;
-border: 1px solid #007bff;
-border-radius: 6px;
-margin: 0 5px;
-transition: background-color 0.3s;
-}
-header a:hover {
-background: #007bff;
- color: white;
-}
-.tela {
- display: none;
-}
-.resultado {
-margin-top: 20px;
-padding: 15px;
-border-radius: 8px;
-border: 1px solid #ddd;
-}
-.resultado p {
- margin: 5px 0;
- width: 100%;
- display: flex;
- flex-wrap: wrap;
-}
-
-.resultado p strong {
-    white-space: nowrap; /* Impede a quebra de linha no título "Mensagem em Bits:" */
-    margin-right: 5px; /* Adiciona um pequeno espaço */
-}
-
-/* Garante que o span se ajuste ao container */
-.resultado p span {
-    word-break: break-all; /* Essa é a propriedade que quebra o texto longo! */
-    overflow-wrap: break-word; /* Uma alternativa para garantir compatibilidade */
-}
-
-</style>
+    <meta charset="UTF-8">
+    <title>Criptografia em Áudio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        #download-btn button {
+            background-color: #007bff; /* Garante que o botão de download tenha a cor correta */
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        #texto-recebido {
+            font-weight: bold;
+            color: #222;
+            text-align: center;
+        }
+        header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        header a {
+            text-decoration: none;
+            color: #007bff;
+            padding: 10px 20px;
+            border: 1px solid #007bff;
+            border-radius: 6px;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+        header a:hover {
+            background: #007bff;
+            color: white;
+        }
+        
+        .tela {
+            display: none;
+        }
+        
+        .resultado {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .resultado p {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 5px 0;
+        }
+        .resultado p strong {
+            white-space: nowrap;
+            margin-right: 5px;
+        }
+        .resultado p span {
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+    </style>
 </head>
 <body>
- <div class="container">
- <header>
- <a href="#" id="link-enviar">Gerar Áudio</a>
-  <a href="#" id="link-escutar">Decodificar Áudio</a>
- </header>
+    <div class="container">
+        <header>
+            <a href="#" id="link-enviar">Gerar Áudio</a>
+            <a href="#" id="link-escutar">Decodificar Áudio</a>
+        </header>
 
-<div id="tela-enviar" class="tela">
-<h2>🔊 Gerar Áudio</h2>
-<form id="form-enviar">
-<input type="text" name="mensagem" placeholder="Digite sua mensagem..." required>
-<button type="submit">Gerar</button>
-</form>
- <div id="status-enviar"></div>
-<audio id="player" controls></audio>
-<div id="resultado-enviar" class="resultado" style="display: none;">
- <p><strong>Mensagem Original:</strong> <span id="msg-original"></span></p>
- <p><strong>Mensagem em Bits:</strong> <span id="bits-enviados"></span></p>
-</div>
-</div>
+        <div id="tela-enviar" class="tela">
+            <h2>🔊 Gerar Áudio</h2>
+            <form id="form-enviar">
+                <input type="text" name="mensagem" placeholder="Digite sua mensagem..." required>
+                <button type="submit">Gerar</button>
+            </form>
+            <div id="status-enviar"></div>
+            <audio id="player" controls></audio>
+            <a id="download-btn" href="#" download="mensagem.wav" style="display: none;">
+                <button>Download Áudio</button>
+            </a>
+            <div id="resultado-enviar" class="resultado" style="display: none;">
+                <p><strong>Mensagem Original:</strong> <span id="msg-original"></span></p>
+                <p><strong>Mensagem em Bits:</strong> <span id="bits-enviados"></span></p>
+            </div>
+        </div>
 
-<div id="tela-escutar" class="tela">
-<h2>🎧 Decodificar Áudio</h2>
-<form id="form-receber" enctype="multipart/form-data">
- <input type="file" name="arquivo" accept=".wav" required>
-<button type="submit">Decodificar</button>
-</form>
-    <div id="status-escutar"></div>
-    <audio id="player-receber" controls></audio>
-<div id="resultado-escutar" class="resultado" style="display: none;">
-<p><strong>Texto Decodificado:</strong> <span id="texto-recebido"></span></p>
-</div>
-</div>
-</div>
+        <div id="tela-escutar" class="tela">
+            <h2>🎧 Decodificar Áudio</h2>
+            <form id="form-receber" enctype="multipart/form-data">
+                <input type="file" name="arquivo" accept=".wav" required>
+                <button type="submit">Decodificar</button>
+            </form>
+            <div id="status-escutar"></div>
+            <audio id="player-receber" controls></audio>
+            <div id="resultado-escutar" class="resultado" style="display: none;">
+                <p><strong>Bits recebidos:</strong> <span id="bits-recebidos"></span></p>
+                <p><strong>Texto decodificado:</strong> <span id="texto-recebido"></span></p>
+            </div>
+        </div>
+    </div>
 
-<script>
- // Funções para alternar as telas
- const telas = document.querySelectorAll('.tela');
- const links = document.querySelectorAll('header a');
- function mostrarTela(telaId) {
-telas.forEach(tela => {
- tela.style.display = 'none';
- });
-document.getElementById(telaId).style.display = 'block';
- }
+    <script>
+        // Funções para alternar as telas
+        const telas = document.querySelectorAll('.tela');
+        const links = document.querySelectorAll('header a');
 
-// Configurar os cliques nos links
-links.forEach(link => {
- link.addEventListener('click', (e) => {
-e.preventDefault();
-const telaId = link.id.replace('link-', 'tela-');
- mostrarTela(telaId);
- });
-});
+        function mostrarTela(telaId) {
+            telas.forEach(tela => {
+                tela.style.display = 'none';
+            });
+            document.getElementById(telaId).style.display = 'block';
+        }
 
-// Mostrar a tela de envio por padrão ao carregar
-document.addEventListener('DOMContentLoaded', () => {
-mostrarTela('tela-enviar');
-});
+        // Configurar os cliques nos links
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const telaId = link.id.replace('link-', 'tela-');
+                mostrarTela(telaId);
+            });
+        });
 
-// Enviar texto -> gerar áudio
-document.getElementById("form-enviar").addEventListener("submit", async e => {
-e.preventDefault();
- 
- const form = e.target;
- const formData = new FormData(form);
- const mensagem = formData.get('mensagem');
- 
-const statusEl = document.getElementById("status-enviar");
-const resultadoEl = document.getElementById("resultado-enviar");
+        // Mostrar a tela de envio por padrão ao carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            mostrarTela('tela-enviar');
+        });
 
-statusEl.innerText = "Gerando áudio...";
-statusEl.style.color = "blue";
-resultadoEl.style.display = "none";
-try {
- const res = await fetch("/enviar", { method: "POST", body: formData });
- if (!res.ok) {
- const errorText = await res.text();
- throw new Error(errorText || `Erro do servidor: ${res.status}`);
- }
- // 1. Alteração: Lendo os dados JSON que o servidor agora envia
- const data = await res.json();
- 
- const player = document.getElementById("player");
-            // Usando a URL de áudio que o servidor enviou no JSON
- player.src = data.audio_url; 
- player.play();
- statusEl.innerText = "Áudio gerado com sucesso!";
- statusEl.style.color = "green";
- 
- document.getElementById("msg-original").innerText = mensagem;
- // 2. Alteração: Mostrando os bits que vieram no JSON
- document.getElementById("bits-enviados").innerText = data.bits;
- 
- resultadoEl.style.display = "block";
+        // Enviar texto -> gerar áudio
+        document.getElementById("form-enviar").addEventListener("submit", async e => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const mensagem = formData.get('mensagem');
+            
+            const statusEl = document.getElementById("status-enviar");
+            const resultadoEl = document.getElementById("resultado-enviar");
+            const downloadBtn = document.getElementById("download-btn");
 
-} catch (error) {
-statusEl.innerText = `Erro: ${error.message}`;
-statusEl.style.color = "red";
-console.error(error);
-}
-});
+            statusEl.innerText = "Gerando áudio...";
+            statusEl.style.color = "blue";
+            resultadoEl.style.display = "none";
+            downloadBtn.style.display = 'none';
 
-// Receber arquivo -> decodificar
-document.getElementById("form-receber").addEventListener("submit", async e => {
-e.preventDefault();
+            try {
+                const res = await fetch("/enviar", { method: "POST", body: formData });
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(errorText || `Erro do servidor: ${res.status}`);
+                }
 
-const formData = new FormData(e.target);
-const audioInput = document.querySelector("#form-receber input[type='file']");
+                const data = await res.json();
+                
+                const player = document.getElementById("player");
+                player.src = data.audio_url; 
+                player.play();
 
-const statusEl = document.getElementById("status-escutar");
-const resultadoEl = document.getElementById("resultado-escutar");
+                downloadBtn.href = data.audio_url;
+                downloadBtn.style.display = 'block';
 
-statusEl.innerText = "Carregando áudio...";
-statusEl.style.color = "blue";
-resultadoEl.style.display = "none";
+                statusEl.innerText = "Áudio gerado com sucesso!";
+                statusEl.style.color = "green";
+                
+                document.getElementById("msg-original").innerText = mensagem;
+                document.getElementById("bits-enviados").innerText = data.bits;
+                
+                resultadoEl.style.display = "block";
 
-try { 
-// 3. Alteração: Tocar o áudio antes de enviar para o servidor
-            const file = audioInput.files[0];
-            const url = URL.createObjectURL(file);
-            const player = document.getElementById("player-receber");
-            player.src = url;
-            player.play();
+            } catch (error) {
+                statusEl.innerText = `Erro: ${error.message}`;
+                statusEl.style.color = "red";
+                console.error(error);
+            }
+        });
 
-            // 4. Alteração: Atualizar o status antes de enviar a requisição
-            statusEl.innerText = "Decodificando áudio...";
+        // Receber arquivo -> decodificar
+        document.getElementById("form-receber").addEventListener("submit", async e => {
+            e.preventDefault();
 
-const res = await fetch("/receber", { method: "POST", body: formData });
-if (!res.ok) {
-const errorText = await res.text(); throw new Error(errorText || `Erro do servidor: ${res.status}`);
-}
-const data = await res.json();
+            const formData = new FormData(e.target);
+            const audioInput = document.querySelector("#form-receber input[type='file']");
 
-document.getElementById("texto-recebido").innerText = data.texto;
- statusEl.innerText = "Decodificação concluída!";
- statusEl.style.color = "green";
- resultadoEl.style.display = "block";
- 
-} catch (error) {
- statusEl.innerText = `Erro: ${error.message}`;
-statusEl.style.color = "red";
-console.error(error);
- }
-});
-</script>
+            const statusEl = document.getElementById("status-escutar");
+            const resultadoEl = document.getElementById("resultado-escutar");
+
+            statusEl.innerText = "Carregando áudio...";
+            statusEl.style.color = "blue";
+            resultadoEl.style.display = "none";
+
+            try { 
+                const file = audioInput.files[0];
+                const url = URL.createObjectURL(file);
+                const player = document.getElementById("player-receber");
+                player.src = url;
+                player.play();
+
+                statusEl.innerText = "Decodificando áudio...";
+
+                const res = await fetch("/receber", { method: "POST", body: formData });
+                if (!res.ok) {
+                    const errorText = await res.text(); 
+                    throw new Error(errorText || `Erro do servidor: ${res.status}`);
+                }
+                const data = await res.json();
+
+                document.getElementById("bits-recebidos").innerText = data.bits;
+                document.getElementById("texto-recebido").innerText = data.texto;
+
+                statusEl.innerText = "Decodificação concluída!";
+                statusEl.style.color = "green";
+                resultadoEl.style.display = "block";
+                
+            } catch (error) {
+                statusEl.innerText = `Erro: ${error.message}`;
+                statusEl.style.color = "red";
+                console.error(error);
+            }
+        });
+    </script>
 </body>
 </html>
