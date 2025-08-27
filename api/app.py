@@ -3,9 +3,9 @@ import os
 from werkzeug.utils import secure_filename
 
 # importa funções de envio
-from enviar import texto_para_binario, binario_para_audio, salvar_wav
+from api.enviar import texto_para_binario, binario_para_audio, salvar_wav
 # importa funções de escuta
-from escutar import ler_wav, audio_para_bits, extrair_bits_validos, bits_para_texto
+from api.escutar import ler_wav, audio_para_bits, extrair_bits_validos, bits_para_texto
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
@@ -29,9 +29,9 @@ def enviar():
         "bits": bits
     }
 
-@app.route("/audio/<filename>")
-def get_audio(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+@app.route("/")
+def index():
+    return send_from_directory("static", "index.html")
 
 @app.route("/receber", methods=["POST"])
 def receber():
