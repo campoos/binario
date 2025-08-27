@@ -1,7 +1,6 @@
 import numpy as np
 import wave
 import struct
-import sounddevice as sd
 
 # -----------------------
 # Parâmetros do transmissor
@@ -74,18 +73,11 @@ def bits_para_texto(bits):
         texto += chr(int(byte, 2))
     return texto
 
-def tocar_audio(audio):
-    """Toca o áudio recebido."""
-    print("Tocando o áudio recebido...")
-    sd.play(audio, SAMPLE_RATE)
-    sd.wait()
-
 # -----------------------
 # Função principal
 # -----------------------
 def main():
     audio = ler_wav("mensagem_binario.wav")
-    tocar_audio(audio)
     bits = audio_para_bits(audio)
     bits_validos = extrair_bits_validos(bits)
     texto_decodificado = bits_para_texto(bits_validos)

@@ -1,5 +1,3 @@
 Flask
 numpy
 gunicorn
-simpleaudio
-sounddevice
