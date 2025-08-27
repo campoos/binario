@@ -15,4 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Define o comando que o Render usará para iniciar sua aplicação
 # O caminho completo garante que o gunicorn seja encontrado
-CMD ["/usr/local/bin/gunicorn", "app:app"]
+# ... (outras linhas)
+
+# Define o comando para iniciar o servidor
+CMD ["python", "-m", "gunicorn", "app:app"]
