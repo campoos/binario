@@ -14,4 +14,4 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Define o comando para iniciar o servidor
-CMD ["gunicorn", "app:app"]
+CMD ["/usr/local/bin/gunicorn", "app:app"]
