@@ -1,7 +1,7 @@
 import numpy as np
 import wave
 import struct
-
+import simpleaudio as sa
 # ----------------------------
 # Configurações globais
 # ----------------------------
@@ -35,6 +35,12 @@ def salvar_wav(audio: np.ndarray, filename: str = ARQUIVO_SAIDA):
         for amostra in audio:
             f.writeframes(struct.pack('<h', int(amostra * 32767)))
 
+def tocar_audio(audio: np.ndarray):
+    """Reproduz áudio gerado diretamente em PCM."""
+    audio_pcm = (audio * 32767).astype(np.int16)
+    play_obj = sa.play_buffer(audio_pcm, 1, 2, SAMPLE_RATE)
+    play_obj.wait_done()
+
 if __name__ == "__main__":
     texto = input("Digite sua mensagem: ")
     print("Gerando áudio criptografado...")
@@ -42,3 +48,4 @@ if __name__ == "__main__":
     audio = binario_para_audio(bits)
     salvar_wav(audio)
     print(f"Mensagem '{texto}' convertida em áudio ({ARQUIVO_SAIDA})")
+    tocar_audio(audio)

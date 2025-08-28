@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
+       <meta charset="UTF-8">
     <title>Criptografia em Áudio</title>
     <style>
         body {
@@ -112,8 +112,7 @@
             <a href="#" id="link-enviar">Gerar Áudio</a>
             <a href="#" id="link-escutar">Decodificar Áudio</a>
         </header>
-
-        <div id="tela-enviar" class="tela">
+          <div id="tela-enviar" class="tela">
             <h2>🔊 Gerar Áudio</h2>
             <form id="form-enviar">
                 <input type="text" name="mensagem" placeholder="Digite sua mensagem..." required>
@@ -129,8 +128,7 @@
                 <p><strong>Mensagem em Bits:</strong> <span id="bits-enviados"></span></p>
             </div>
         </div>
-
-        <div id="tela-escutar" class="tela">
+           <div id="tela-escutar" class="tela">
             <h2>🎧 Decodificar Áudio</h2>
             <form id="form-receber" enctype="multipart/form-data">
                 <input type="file" name="arquivo" accept=".wav" required>
@@ -144,8 +142,7 @@
             </div>
         </div>
     </div>
-
-    <script>
+     <script>
         // Funções para alternar as telas
         const telas = document.querySelectorAll('.tela');
         const links = document.querySelectorAll('header a');
@@ -170,8 +167,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             mostrarTela('tela-enviar');
         });
-
-        // Enviar texto -> gerar áudio
+           // Enviar texto -> gerar áudio
         document.getElementById("form-enviar").addEventListener("submit", async e => {
             e.preventDefault();
             
@@ -182,77 +178,62 @@
             const statusEl = document.getElementById("status-enviar");
             const resultadoEl = document.getElementById("resultado-enviar");
             const downloadBtn = document.getElementById("download-btn");
-
-            statusEl.innerText = "Gerando áudio...";
+             statusEl.innerText = "Gerando áudio...";
             statusEl.style.color = "blue";
             resultadoEl.style.display = "none";
             downloadBtn.style.display = 'none';
-
-            try {
+               try {
                 const res = await fetch("/enviar", { method: "POST", body: formData });
                 if (!res.ok) {
                     const errorText = await res.text();
                     throw new Error(errorText || `Erro do servidor: ${res.status}`);
                 }
-
-                const data = await res.json();
+                 const data = await res.json();
                 
                 const player = document.getElementById("player");
                 player.src = data.audio_url; 
                 player.play();
-
-                downloadBtn.href = data.audio_url;
+                  downloadBtn.href = data.audio_url;
                 downloadBtn.style.display = 'block';
-
-                statusEl.innerText = "Áudio gerado com sucesso!";
+                   statusEl.innerText = "Áudio gerado com sucesso!";
                 statusEl.style.color = "green";
                 
                 document.getElementById("msg-original").innerText = mensagem;
                 document.getElementById("bits-enviados").innerText = data.bits;
                 
                 resultadoEl.style.display = "block";
-
-            } catch (error) {
+                  } catch (error) {
                 statusEl.innerText = `Erro: ${error.message}`;
                 statusEl.style.color = "red";
                 console.error(error);
             }
         });
-
         // Receber arquivo -> decodificar
         document.getElementById("form-receber").addEventListener("submit", async e => {
             e.preventDefault();
-
             const formData = new FormData(e.target);
             const audioInput = document.querySelector("#form-receber input[type='file']");
-
-            const statusEl = document.getElementById("status-escutar");
+             const statusEl = document.getElementById("status-escutar");
             const resultadoEl = document.getElementById("resultado-escutar");
-
-            statusEl.innerText = "Carregando áudio...";
+               statusEl.innerText = "Carregando áudio...";
             statusEl.style.color = "blue";
             resultadoEl.style.display = "none";
-
-            try { 
+                try { 
                 const file = audioInput.files[0];
                 const url = URL.createObjectURL(file);
                 const player = document.getElementById("player-receber");
                 player.src = url;
                 player.play();
-
-                statusEl.innerText = "Decodificando áudio...";
-
-                const res = await fetch("/receber", { method: "POST", body: formData });
+                  statusEl.innerText = "Decodificando áudio...";
+                    const res = await fetch("/receber", { method: "POST", body: formData });
                 if (!res.ok) {
                     const errorText = await res.text(); 
                     throw new Error(errorText || `Erro do servidor: ${res.status}`);
                 }
                 const data = await res.json();
-
-                document.getElementById("bits-recebidos").innerText = data.bits;
+                 document.getElementById("bits-recebidos").innerText = data.bits;
                 document.getElementById("texto-recebido").innerText = data.texto;
-
-                statusEl.innerText = "Decodificação concluída!";
+                 statusEl.innerText = "Decodificação concluída!";
                 statusEl.style.color = "green";
                 resultadoEl.style.display = "block";
                 
